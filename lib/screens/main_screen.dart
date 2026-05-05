@@ -25,20 +25,18 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkScreen = _currentIndex == 1 || _currentIndex == 3;
-    
     // نستمع هنا لعدد المنتجات المختلفة في السلة
     final cartItemCount = context.watch<CartProvider>().items.length;
 
     return Scaffold(
-      backgroundColor: isDarkScreen ? const Color(0xFF1E1E24) : Colors.white,
+      backgroundColor: const Color(0xFF1E1E24),
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF1E1E24),
         selectedItemColor: Colors.redAccent,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: Colors.white54,
         type: BottomNavigationBarType.fixed,
         items: [
           const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),

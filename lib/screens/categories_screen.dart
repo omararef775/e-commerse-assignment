@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'category_products_screen.dart';
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
@@ -31,18 +32,28 @@ class CategoriesScreen extends StatelessWidget {
                 ),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2A2A32),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(categories[index]['icon'] as IconData, size: 40, color: categories[index]['color'] as Color),
-                        const SizedBox(height: 15),
-                        Text(categories[index]['name'] as String, style: const TextStyle(color: Colors.white70, fontSize: 16)),
-                      ],
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CategoryProductsScreen(categoryName: categories[index]['name'] as String),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2A2A32),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(categories[index]['icon'] as IconData, size: 40, color: categories[index]['color'] as Color),
+                          const SizedBox(height: 15),
+                          Text(categories[index]['name'] as String, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+                        ],
+                      ),
                     ),
                   );
                 },

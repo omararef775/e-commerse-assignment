@@ -25,8 +25,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'E-Commerce App',
       theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF1E1E24),
         primarySwatch: Colors.blue,
-        fontFamily: 'Arial', // يمكنك تغييره لخط احترافي لاحقاً
+        fontFamily: 'Arial',
       ),
       home: const MainScreen(),
     );

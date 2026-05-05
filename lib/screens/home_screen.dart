@@ -3,13 +3,10 @@ import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../providers/favorites_provider.dart';
+import 'product_details_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  final List<Product> products = [
-    Product(id: '1', name: 'Aura Noise-Cancel', category: 'Electronics', price: 149.99, oldPrice: 249.99, discount: '-40%', imageUrl: '🎧'),
-    Product(id: '2', name: 'Nova Smart Watch', category: 'Electronics', price: 129.99, oldPrice: 199.99, discount: '-30%', imageUrl: '⌚'),
-    Product(id: '3', name: 'Luro Leather Bag', category: 'Fashion', price: 59.99, oldPrice: 140.00, discount: '-50%', imageUrl: '👜'),
-  ];
+  final List<Product> products = Product.dummyProducts;
 
   HomeScreen({super.key});
 
@@ -55,8 +52,8 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.white70)),
             ],
           ),
         ),
@@ -68,68 +65,77 @@ class HomeScreen extends StatelessWidget {
   Widget _buildProductCard(BuildContext context, Product product) {
     final isFav = context.watch<FavoritesProvider>().isFavorite(product);
 
-    return Container(
-      // قمنا بتوسيع البطاقة قليلاً لترتاح النصوص
-      width: 170, 
-      margin: const EdgeInsets.only(right: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min, // يمنع التمدد غير الضروري
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: 150, // زيادة ارتفاع الصورة قليلاً
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(20),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailsScreen(product: product)));
+      },
+      child: Container(
+        width: 170, 
+        margin: const EdgeInsets.only(right: 15),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A32),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // يمنع التمدد غير الضروري
+          children: [
+            Stack(
+              children: [
+                Container(
+                  height: 140, // زيادة ارتفاع الصورة قليلاً
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E24),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Center(child: Text(product.imageUrl, style: const TextStyle(fontSize: 60))),
                 ),
-                child: Center(child: Text(product.imageUrl, style: const TextStyle(fontSize: 60))),
-              ),
-              Positioned(
-                top: 10, left: 10,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.orangeAccent, borderRadius: BorderRadius.circular(10)),
-                  child: Text(product.discount, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                Positioned(
+                  top: 10, left: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(color: Colors.orangeAccent, borderRadius: BorderRadius.circular(10)),
+                    child: Text(product.discount, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                  ),
                 ),
-              ),
-              Positioned(
-                top: 5, right: 5,
-                child: IconButton(
-                  icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, color: isFav ? Colors.red : Colors.grey),
-                  onPressed: () => context.read<FavoritesProvider>().toggleFavorite(product),
+                Positioned(
+                  top: 5, right: 5,
+                  child: IconButton(
+                    icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, color: isFav ? Colors.red : Colors.grey),
+                    onPressed: () => context.read<FavoritesProvider>().toggleFavorite(product),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(product.category, style: const TextStyle(color: Colors.orange, fontSize: 12)),
-          // أضفنا Expanded لضمان عدم حدوث طفح في النص
-          Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14), maxLines: 2, overflow: TextOverflow.ellipsis),
-          const SizedBox(height: 5),
-          Row(
-            children: [
-              Text('\$${product.price}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(width: 5),
-              if (product.oldPrice != null)
-                Text('\$${product.oldPrice}', style: const TextStyle(color: Colors.grey, decoration: TextDecoration.lineThrough, fontSize: 12)),
-            ],
-          ),
-          const Spacer(), // يقوم بدفع الزر للأسفل للحفاظ على ترتيب البطاقات
-          ElevatedButton(
-            onPressed: () {
-               context.read<CartProvider>().addToCart(product);
-               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت الإضافة للسلة'), duration: Duration(seconds: 1)));
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black87,
-              minimumSize: const Size(double.infinity, 35), // زر أطول قليلاً
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+              ],
             ),
-            child: const Text('Add to cart', style: TextStyle(color: Colors.white, fontSize: 12)),
-          )
-        ],
+            const SizedBox(height: 10),
+            Text(product.category, style: const TextStyle(color: Colors.orange, fontSize: 12)),
+            // أضفنا Expanded لضمان عدم حدوث طفح في النص
+            Text(product.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14), maxLines: 2, overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                Text('\$${product.price}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(width: 5),
+                if (product.oldPrice != null)
+                  Text('\$${product.oldPrice}', style: const TextStyle(color: Colors.white54, decoration: TextDecoration.lineThrough, fontSize: 12)),
+              ],
+            ),
+            const Spacer(), // يقوم بدفع الزر للأسفل للحفاظ على ترتيب البطاقات
+            ElevatedButton(
+              onPressed: () {
+                 context.read<CartProvider>().addToCart(product);
+                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت الإضافة للسلة'), duration: Duration(seconds: 1)));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                minimumSize: const Size(double.infinity, 35), // زر أطول قليلاً
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+              ),
+              child: const Text('Add to cart', style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+            )
+          ],
+        ),
       ),
     );
   }
