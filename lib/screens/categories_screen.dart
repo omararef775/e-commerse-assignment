@@ -4,40 +4,86 @@ import 'category_products_screen.dart';
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
 
+  // DummyJSON category slugs (exact strings returned by the API) paired with
+  // human-readable display labels and UI styling.
+  static const List<Map<String, dynamic>> _apiCategories = [
+    {
+      'apiName': 'smartphones',
+      'label': 'Smartphones',
+      'icon': Icons.smartphone,
+      'color': Color(0xFF4FC3F7), // light blue
+    },
+    {
+      'apiName': 'laptops',
+      'label': 'Laptops',
+      'icon': Icons.laptop,
+      'color': Color(0xFF80DEEA), // cyan
+    },
+    {
+      'apiName': 'mens-shirts',
+      'label': "Men's Fashion",
+      'icon': Icons.checkroom,
+      'color': Color(0xFF80CBC4), // teal
+    },
+    {
+      'apiName': 'womens-dresses',
+      'label': "Women's Fashion",
+      'icon': Icons.dry_cleaning,
+      'color': Color(0xFFF48FB1), // pink
+    },
+    {
+      'apiName': 'beauty',
+      'label': 'Beauty',
+      'icon': Icons.auto_awesome,
+      'color': Color(0xFFCE93D8), // purple
+    },
+    {
+      'apiName': 'sports-accessories',
+      'label': 'Sports',
+      'icon': Icons.sports_basketball,
+      'color': Color(0xFFA5D6A7), // green
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final categories = [
-      {'name': 'Electronics', 'icon': Icons.electrical_services, 'color': Colors.blue},
-      {'name': 'Fashion', 'icon': Icons.checkroom, 'color': Colors.red},
-      {'name': 'Sports', 'icon': Icons.sports_baseball, 'color': Colors.green},
-      {'name': 'Perfumes', 'icon': Icons.local_florist, 'color': Colors.purple},
-      {'name': 'Backset', 'icon': Icons.backpack, 'color': Colors.teal},
-      {'name': 'Others', 'icon': Icons.category, 'color': Colors.orange},
-    ];
-
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Categories', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text(
+              'Categories',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            const Text('Browse by category',
+                style: TextStyle(color: Colors.white54, fontSize: 13)),
             const SizedBox(height: 20),
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 1.1,
+                  childAspectRatio: 1.15,
                   crossAxisSpacing: 15,
                   mainAxisSpacing: 15,
                 ),
-                itemCount: categories.length,
+                itemCount: _apiCategories.length,
                 itemBuilder: (context, index) {
+                  final cat = _apiCategories[index];
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => CategoryProductsScreen(categoryName: categories[index]['name'] as String),
+                          builder: (_) => CategoryProductsScreen(
+                            categoryName: cat['apiName'] as String,
+                            displayName: cat['label'] as String,
+                          ),
                         ),
                       );
                     },
@@ -49,9 +95,23 @@ class CategoriesScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(categories[index]['icon'] as IconData, size: 40, color: categories[index]['color'] as Color),
-                          const SizedBox(height: 15),
-                          Text(categories[index]['name'] as String, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: (cat['color'] as Color)
+                                  .withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(cat['icon'] as IconData,
+                                size: 34, color: cat['color'] as Color),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            cat['label'] as String,
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
                         ],
                       ),
                     ),

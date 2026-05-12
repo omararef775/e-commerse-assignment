@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Required for all network requests (API calls, image loading) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:label="ecommerce_app"
         android:name="${applicationName}"

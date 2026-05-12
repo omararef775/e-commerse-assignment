@@ -5,7 +5,9 @@ class Product {
   final double price;
   final double? oldPrice;
   final String discount;
-  final String imageUrl; // سنستخدم أيقونات أو روابط وهمية مؤقتاً
+  final String imageUrl;
+  final double rating;
+  final String description;
 
   Product({
     required this.id,
@@ -15,13 +17,70 @@ class Product {
     this.oldPrice,
     this.discount = '',
     required this.imageUrl,
+    this.rating = 0.0,
+    this.description = '',
   });
 
-  static List<Product> dummyProducts = [
-    Product(id: '1', name: 'Aura Noise-Cancel', category: 'Electronics', price: 149.99, oldPrice: 249.99, discount: '-40%', imageUrl: '🎧'),
-    Product(id: '2', name: 'Nova Smart Watch', category: 'Electronics', price: 129.99, oldPrice: 199.99, discount: '-30%', imageUrl: '⌚'),
-    Product(id: '3', name: 'Luro Leather Bag', category: 'Fashion', price: 59.99, oldPrice: 140.00, discount: '-50%', imageUrl: '👜'),
-    Product(id: '4', name: 'Sport Shoes', category: 'Sports', price: 89.99, oldPrice: 120.00, discount: '-25%', imageUrl: '👟'),
-    Product(id: '5', name: 'Luxury Perfume', category: 'Perfumes', price: 79.99, oldPrice: 100.00, discount: '-20%', imageUrl: '✨'),
-  ];
+  /// Creates a [Product] from a DummyJSON API response object.
+  ///
+  /// DummyJSON field mapping:
+  ///   title             → name
+  ///   category          → category  (slug e.g. "beauty", "smartphones")
+  ///   price             → price
+  ///   discountPercentage→ discount  (e.g. 10.48 → "-10%")
+  ///   thumbnail         → imageUrl  (always present and reliable)
+  ///   rating            → rating
+  ///   description       → description
+  factory Product.fromJson(Map<String, dynamic> json) {
+    final price = (json['price'] as num).toDouble();
+    final discountPct = (json['discountPercentage'] as num? ?? 0).round();
+
+    // Reverse-compute the original price before the discount was applied.
+    // oldPrice = price / (1 - discountPct / 100)
+    final double? oldPrice = discountPct > 0
+        ? double.parse(
+            (price / (1 - discountPct / 100)).toStringAsFixed(2))
+        : null;
+
+    return Product(
+      id: json['id'].toString(),
+      name: json['title'] as String,
+      category: json['category'] as String,
+      price: price,
+      oldPrice: oldPrice,
+      discount: discountPct > 0 ? '-$discountPct%' : '',
+      // thumbnail is always present; fall back to first image if somehow missing.
+      imageUrl: (json['thumbnail'] as String?) ??
+          ((json['images'] as List?)?.first as String? ?? ''),
+      rating: (json['rating'] as num? ?? 0).toDouble(),
+      description: json['description'] as String? ?? '',
+    );
+  }
+
+  /// Serialises this product back to a DummyJSON-compatible map.
+  /// Used to re-read cached products with the same [fromJson] factory.
+  Map<String, dynamic> toJson() => {
+        'id': int.tryParse(id) ?? id,
+        'title': name,
+        'category': category,
+        'price': price,
+        'discountPercentage':
+            oldPrice != null && oldPrice! > 0
+                ? double.parse(
+                    (((oldPrice! - price) / oldPrice!) * 100)
+                        .toStringAsFixed(2))
+                : 0.0,
+        'thumbnail': imageUrl,
+        'rating': rating,
+        'description': description,
+      };
+
+  /// Lightweight map for the favourites file — only the essential fields.
+  Map<String, dynamic> toFavJson() => {
+        'id': id,
+        'title': name,
+        'category': category,
+        'price': price,
+        'image': imageUrl,
+      };
 }

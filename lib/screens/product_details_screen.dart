@@ -39,11 +39,26 @@ class ProductDetailsScreen extends StatelessWidget {
                       width: double.infinity,
                       margin: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2A2A32),
+                        color: const Color(0xFFF5F5F5),
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      child: Center(
-                        child: Text(product.imageUrl, style: const TextStyle(fontSize: 120)),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Image.network(
+                          product.imageUrl,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (_, child, progress) {
+                            if (progress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                  color: Colors.redAccent),
+                            );
+                          },
+                          errorBuilder: (context, error, trace) => const Center(
+                            child: Icon(Icons.broken_image_outlined,
+                                color: Colors.grey, size: 64),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -78,10 +93,11 @@ class ProductDetailsScreen extends StatelessWidget {
                           const SizedBox(height: 30),
                           const Text('Description', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 10),
-                          const Text(
-                            'This is a dummy description for the product. It gives you an overview of the item. '
-                            'You can add more detailed text here to provide better insights for the customers.',
-                            style: TextStyle(color: Colors.white70, fontSize: 16, height: 1.5),
+                          Text(
+                            product.description.isNotEmpty
+                                ? product.description
+                                : 'No description available.',
+                            style: const TextStyle(color: Colors.white70, fontSize: 16, height: 1.5),
                           ),
                         ],
                       ),
