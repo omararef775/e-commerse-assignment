@@ -5,6 +5,7 @@ import '../providers/cart_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/product_provider.dart';
 import 'product_details_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -149,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 15),
         SizedBox(
-          height: 320,
+          height: 350,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: todayDeals.length,
@@ -165,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 15),
         SizedBox(
-          height: 300,
+          height: 350,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: trending.length,

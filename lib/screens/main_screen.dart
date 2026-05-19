@@ -6,6 +6,7 @@ import 'favorites_screen.dart';
 import 'cart_screen.dart';
 import 'categories_screen.dart';
 
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 

@@ -1,71 +1,53 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/product.dart';
-import '../services/api_service.dart';
 
-/// Manages the full product list fetched from the remote API.
-///
-/// States:
-/// - [isLoading] — network request in flight
-/// - [error]     — request failed AND no cache available
-/// - [products]  — data ready (may be from cache if [isOffline] is true)
-/// - [isOffline] — data came from local cache (network was unavailable)
 class ProductProvider extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
-
   List<Product> _products = [];
-  bool _isLoading = false;
+  bool _isLoading = true; // يبدأ بالتحميل
   String? _error;
-  bool _isOffline = false;
+  StreamSubscription? _subscription;
 
-  // ── Getters ───────────────────────────────────────────────────────────────
-
+  // ── Getters ──
   List<Product> get products => _products;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  bool get isOffline => _isOffline;
+  // الفايربيس يدير وضع عدم الاتصال تلقائياً، تركنا هذا المتغير فقط حتى لا نعطل شاشة الـ HomeScreen
+  bool get isOffline => false; 
 
-  /// Returns the distinct category names present in the loaded products.
   List<String> get categories =>
       _products.map((p) => p.category).toSet().toList()..sort();
 
-  /// Returns products belonging to [category] (case-insensitive).
   List<Product> productsByCategory(String category) => _products
       .where((p) => p.category.toLowerCase() == category.toLowerCase())
       .toList();
 
-  // ── Actions ───────────────────────────────────────────────────────────────
-
-  /// Loads products from the API (or cache on failure).
-  Future<void> loadProducts() async {
-    _isLoading = true;
-    _error = null;
-    _isOffline = false;
-    notifyListeners();
-
-    try {
-      _products = await _apiService.fetchProducts();
-      _isOffline = _apiService.isFromCache;
-    } catch (e) {
-      _error = _friendlyMessage(e);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+  // ── قراءة البيانات بالتزامن اللحظي ──
+  void loadProducts() {
+    // التكليف الثاني: استخدام snapshots() للحصول على التحديثات اللحظية
+    _subscription = FirebaseFirestore.instance
+        .collection('products')
+        .snapshots()
+        .listen(
+      (snapshot) {
+        // تحويل وثائق السحابة إلى نموذج Product باستخدام دالة fromDoc
+        _products = snapshot.docs.map((doc) => Product.fromDoc(doc)).toList();
+        _isLoading = false;
+        _error = null;
+        notifyListeners();
+      },
+      onError: (e) {
+        _error = 'Failed to fetch data from cloud.\nPlease check your connection.';
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
-  String _friendlyMessage(Object e) {
-    final raw = e.toString().toLowerCase();
-    if (raw.contains('socket') ||
-        raw.contains('connection') ||
-        raw.contains('network') ||
-        raw.contains('host')) {
-      return 'No internet connection.\nPlease check your network and try again.';
-    }
-    if (raw.contains('timeout')) {
-      return 'The request timed out.\nPlease try again.';
-    }
-    return 'Something went wrong.\nPlease try again later.';
+  @override
+  void dispose() {
+    _subscription?.cancel(); // إغلاق الاتصال عند تدمير المزود لتوفير الموارد
+    super.dispose();
   }
 }

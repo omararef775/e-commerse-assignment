@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 class Product {
   final String id;
   final String name;
@@ -83,4 +84,33 @@ class Product {
         'price': price,
         'image': imageUrl,
       };
+      /// Creates a [Product] from a Firestore Document Snapshot.
+  factory Product.fromDoc(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    return Product(
+      id: doc.id, // نأخذ المعرف مباشرة من وثيقة الفايربيس
+      name: data['name'] as String? ?? '',
+      category: data['category'] as String? ?? '',
+      price: (data['price'] as num?)?.toDouble() ?? 0.0,
+      oldPrice: (data['oldPrice'] as num?)?.toDouble(),
+      discount: data['discount'] as String? ?? '',
+      imageUrl: data['imageUrl'] as String? ?? '',
+      rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+      description: data['description'] as String? ?? '',
+    );
+  }
+
+  /// Serialises this product to a Map to be saved in Firestore.
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'category': category,
+      'price': price,
+      'oldPrice': oldPrice,
+      'discount': discount,
+      'imageUrl': imageUrl,
+      'rating': rating,
+      'description': description,
+    };
+  }
 }
